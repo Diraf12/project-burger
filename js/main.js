@@ -1,84 +1,120 @@
-//Form component
-class ContactForm extends React.Component {
+//In the Settings for this pen, I've selected Babel for a Javascript preprocessor.
+//I also brought in  'React' and 'ReactDOM' libraries via the Codepen's 'Quick Add' feature.
+//The React CDN allows me to construct the Application component used to create the form.
+//The ReactDOM CDN is necessary to access the React's virtual DOM and renders the JSX to the page.
+
+class Application extends React.Component {
   constructor(props) {
     super(props);
+
+    //the Application component's state is below, which records the user's input.
+
     this.state = {
-      name: "",
+      //the display property on state allows me to toggle the view of the form vs. the view of the user's data
+      display: false,
+      firstName: "",
+      lastName: "",
+      phone: 0,
       email: "",
     };
-
-    this.handleChange = this.handleInputChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleInputChange(event) {
-    const target = event.target;
-    const value = target.type === "checkbox" ? target.checked : target.value;
-    const name = target.name;
+  inputCheck = (e) => {
+    let filter = e.target.getAttribute("filter");
+    e.target.value = e.target.value.replace(new RegExp(filter, "g"), "");
+    this.setState({ [e.target.name]: e.target.value });
+  };
 
+  submitCheck = () => {
+    if (!this.state.firstName || !this.state.lastName) {
+      alert("A name field is empty.");
+    } else if (this.state.phone.length < 10 || !this.state.phone) {
+      alert("Phone number is not long enough.");
+    } else if (!this.state.email.match(/@./g)) {
+      alert("Email is in the wrong format.");
+    } else {
+      this.setState({ display: true });
+    }
+  };
+
+  resetForm = () => {
     this.setState({
-      [name]: value,
+      display: !this.state.display,
+      firstName: "",
+      lastName: "",
+      phone: 0,
+      email: "",
     });
-    console.log("Change detected. State updated" + name + " = " + value);
-  }
-
-  handleSubmit(event) {
-    alert(
-      "A form was submitted: " + this.state.name + " // " + this.state.email
-    );
-    event.preventDefault();
-  }
-
-  render() {
+  };
+  //the displayForm function returns the JSX needed to display the form, and record the user's information
+  displayForm() {
     return (
-      <div>
-        <form onSubmit={this.handleSubmit}>
-          <div className="form-group">
-            <label for="nameImput">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={this.state.name}
-              onChange={this.handleChange}
-              className="form-control"
-              id="nameImput"
-              placeholder="Name"
-            />
-          </div>
-          <div className="form-group">
-            <label for="emailImput">Name</label>
-            <input
-              name="email"
-              type="email"
-              value={this.state.email}
-              onChange={this.handleChange}
-              className="form-control"
-              id="emailImput"
-              placeholder="email@domain.com"
-            />
-          </div>
-          <input type="submit" value="Submit" className="btn btn-primary" />
-        </form>
+      <div className="form">
+        <div className="header">
+          <h1>Welcome!</h1>
+          <p>Please provide your information below.</p>
+        </div>
+        <div className="inputcontainer">
+          {/* Below are the text fields that record the user's information. Each uses the onChange event handler, and sets the user input value to the component's state in real time using e.target.value    */}
+          <input
+            filter="[^a-zA-Z ]"
+            name="firstName"
+            placeholder="First Name"
+            onChange={this.inputCheck}
+          />
+          <input
+            filter="[^a-zA-Z ]"
+            name="lastName"
+            placeholder="Last Name"
+            onChange={this.inputCheck}
+          />
+          <input
+            filter="[^0-9]"
+            maxLength="10"
+            name="phone"
+            placeholder="Phone Number"
+            onChange={this.inputCheck}
+          />
+          <input
+            placeholder="Email Address"
+            onChange={(e) => {
+              this.setState({ email: e.target.value });
+            }}
+          />
+
+          {/* Below is the submit button. Using the onClick event handler, it changes the value of this.state.display to false, which would trigger the ternary in the render method to display the user's info instead of this form*/}
+          <button onClick={this.submitCheck}>Submit</button>
+        </div>
       </div>
     );
   }
-}
 
-class MainTitle extends React.Component {
-  render() {
-    return <h1>React Form example</h1>;
-  }
-}
-
-class App extends React.Component {
-  render() {
+  /* Below is my displayData function. It returns the JSX needed to display the user's info after it is recorded. */
+  displayData() {
     return (
-      <div>
-        <MainTitle />
-        <ContactForm />
+      <div className="form">
+        {/*Below is the JSX that displays the user's info in the specified format*/}
+        <p>
+          {this.state.lastName}, {this.state.firstName}
+        </p>
+        <p>
+          {this.state.phone} | {this.state.email}
+        </p>
+
+        {/* The button below contains an onClick handler that switches the value of this.state.display to true, and thus would bring the user back to the original form*/}
+        <button onClick={this.resetForm}>Reset</button>
       </div>
     );
   }
+  render() {
+    {
+      /* Here in the render method, I'm returning a ternary operator that displays either the form, or the user's data, depending on the boolean value that is currently set to this.state.display*/
+    }
+    return this.state.display ? this.displayData() : this.displayForm();
+  }
 }
 
-React.render(<App />, document.getElementById("app"));
+{
+  /*Here, I'm invoking the ReactDOM and connected. Here is where this Application component is being connected to the HTML portion of the pen, and thus displaying the form on the page */
+}
+ReactDOM.render(<Application />, document.getElementById("app"));
